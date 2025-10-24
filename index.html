@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Modern Landing with Contact Form</title>
 
-<!-- Inline CSS -->
 <style>
-  /* Reset & body */
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Inter', sans-serif;
@@ -18,7 +16,6 @@
     min-height: 100vh;
   }
 
-  /* Glass card container */
   .glass-card {
     background: rgba(255,255,255,0.15);
     backdrop-filter: blur(15px);
@@ -30,16 +27,11 @@
     animation: fadeIn 1s ease;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px);}
-    to { opacity: 1; transform: translateY(0);}
-  }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
 
-  /* Heading */
   h1, h3 { text-align: center; margin-bottom: 20px; color: #111827; }
   h1 { font-size: 2rem; }
 
-  /* Form fields */
   .form-group { margin-bottom: 18px; }
   label { display: block; margin-bottom: 6px; color: #374151; font-weight: 500; }
   input, textarea {
@@ -58,7 +50,6 @@
   }
   textarea { resize: vertical; min-height: 120px; }
 
-  /* Button */
   .neon-button {
     width: 100%;
     padding: 14px;
@@ -71,52 +62,40 @@
     font-size: 16px;
     transition: 0.3s;
   }
-  .neon-button:hover {
-    box-shadow: 0 0 10px #3b82f6, 0 0 20px #3b82f6;
-  }
+  .neon-button:hover { box-shadow:0 0 10px #3b82f6,0 0 20px #3b82f6; }
 
-  /* Loading animation */
   .hidden { display: none; }
   .loading-dots { display: inline-flex; gap: 4px; }
-  .loading-dot {
-    width: 6px; height: 6px;
-    background: #fff;
-    border-radius: 50%;
-    animation: blink 1s infinite;
-  }
-  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
-  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes blink {
-    0%, 80%, 100% { opacity: 0; }
-    40% { opacity: 1; }
-  }
+  .loading-dot { width:6px; height:6px; background:#fff; border-radius:50%; animation:blink 1s infinite; }
+  .loading-dot:nth-child(2){ animation-delay:0.2s; }
+  .loading-dot:nth-child(3){ animation-delay:0.4s; }
+  @keyframes blink { 0%,80%,100%{opacity:0;}40%{opacity:1;} }
 
-  /* Toast notifications */
   .toast {
     position: fixed;
     bottom: 40px;
-    left: 50%;
+    left:50%;
     transform: translateX(-50%);
     background: #111827;
-    color: #fff;
-    padding: 14px 22px;
-    border-radius: 10px;
-    opacity: 0;
-    transition: opacity 0.3s, transform 0.3s;
-    z-index: 9999;
+    color:#fff;
+    padding:14px 22px;
+    border-radius:10px;
+    opacity:0;
+    transition:0.3s;
+    z-index:9999;
   }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(-10px); }
   .toast.success { background: #16a34a; }
   .toast.error { background: #dc2626; }
 </style>
 </head>
 <body>
 
-<!-- Glass Card / Form Container -->
 <div class="glass-card">
   <h1>Welcome to My Landing Page</h1>
   <h3>Contact Me</h3>
 
+  <!-- Netlify Form -->
   <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="contact-form">
     <input type="hidden" name="form-name" value="contact">
     <p hidden><label>Don’t fill this out if you’re human: <input name="bot-field"></label></p>
@@ -154,55 +133,54 @@
   </form>
 </div>
 
-<!-- Inline JS -->
 <script>
-  function initializeContactForm() {
-      const form = document.getElementById('contact-form');
-      const submitBtn = document.getElementById('submit-btn');
-      const submitText = document.getElementById('submit-text');
-      const submitLoading = document.getElementById('submit-loading');
+const form = document.getElementById('contact-form');
+const submitBtn = document.getElementById('submit-btn');
+const submitText = document.getElementById('submit-text');
+const submitLoading = document.getElementById('submit-loading');
 
-      form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          submitText.classList.add('hidden');
-          submitLoading.classList.remove('hidden');
-          submitBtn.disabled = true;
+form.addEventListener('submit', async (event) => {
+  event.preventDefault(); // prevent page reload
 
-          try {
-              const formData = new FormData(form);
-              const response = await fetch("/", { method: "POST", body: formData });
+  submitText.classList.add('hidden');
+  submitLoading.classList.remove('hidden');
+  submitBtn.disabled = true;
 
-              if (response.ok) {
-                  showToast("Message sent successfully! We'll get back to you soon.", "success");
-                  form.reset();
-              } else {
-                  showToast("Failed to send message. Please try again.", "error");
-              }
-          } catch (err) {
-              console.error(err);
-              showToast("An error occurred. Please try again.", "error");
-          } finally {
-              submitText.classList.remove('hidden');
-              submitLoading.classList.add('hidden');
-              submitBtn.disabled = false;
-          }
-      });
+  const formData = new FormData(form);
+
+  try {
+    const response = await fetch("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(formData).toString()
+    });
+
+    if (response.ok) {
+      showToast("✅ Message sent successfully!", "success");
+      form.reset();
+    } else {
+      showToast("❌ Failed to send message. Please try again.", "error");
+    }
+  } catch (error) {
+    showToast("⚠️ Error: " + error.message, "error");
+  } finally {
+    submitText.classList.remove('hidden');
+    submitLoading.classList.add('hidden');
+    submitBtn.disabled = false;
   }
+});
 
-  function showToast(message, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.classList.add('show'), 100);
-      setTimeout(() => {
-          toast.classList.remove('show');
-          setTimeout(() => document.body.removeChild(toast), 400);
-      }, 4000);
-  }
-
-  // Initialize form
-  initializeContactForm();
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 100);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => document.body.removeChild(toast), 400);
+  }, 4000);
+}
 </script>
 </body>
 </html>
